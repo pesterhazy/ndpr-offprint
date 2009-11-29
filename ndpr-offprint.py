@@ -17,7 +17,7 @@ except IndexError:
     of = "out.pdf"
 
 if a.lower().startswith("http://"):
-    print("Fechting URL: " + a)
+    print("Fetching URL: " + a)
     f = urllib2.urlopen(a).read()
 else:
     f = open(a).read()
@@ -29,7 +29,6 @@ s.find('div',id="header").extract()
 s.find('div',id="footer").extract()
 
 print("Converting to latin1...")
-
 child = subprocess.Popen(['uconv', '-f', 'utf8', '-t', 'latin1', '-c'],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
 s=child.communicate(str(s))[0]
 
