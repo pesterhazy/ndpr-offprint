@@ -3,7 +3,40 @@
 import sys
 import BeautifulSoup
 import urllib2
-import subprocess
+import subprocess, tempfile
+
+HTML2PSCONFIG = """
+BODY {
+    font-size: 14pt; 
+    font-family: Times; 
+    text-align: justify; 
+}
+A:link {
+    color: black;
+}
+\@page { 
+    margin-left: 2.5cm; 
+    margin-right: 2.5cm; 
+    margin-top: 2.5cm; 
+    margin-bottom: 2.5cm; 
+}
+\@html2ps { 
+    option { 
+        twoup: 1; 
+        landscape: 1; 
+        number: 0; 
+    } 
+    paper { type: a4 } 
+	header {
+	    right: "NDPR";
+		left: $T;
+    }
+    footer {
+        left: $N;
+        right: NDPR;
+    }
+}
+"""
 
 try:
     a = sys.argv[1]
@@ -33,8 +66,12 @@ child = subprocess.Popen(['uconv', '-f', 'utf8', '-t', 'latin1', '-c'],stdin=sub
 s=child.communicate(str(s))[0]
 
 print("Running html2ps...")
-child = subprocess.Popen(["html2ps", "-D", "-f", "html2ps.conf"],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
+configfile = tempfile.NamedTemporaryFile()
+configfile.write(HTML2PSCONFIG)
+configfile.flush()
+child = subprocess.Popen(["html2ps", "-D", "-f", configfile.name],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
 s=child.communicate(str(s))[0]
+configfile.close()
 
 print("Running ps2pdf...")
 child = subprocess.Popen(["ps2pdf", "-", "-"],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
