@@ -97,7 +97,7 @@ def main():
     s=typeparser.extract(f)
 
     print("Converting to latin1...")
-    child = subprocess.Popen(['uconv', '-f', 'utf8', '-t', 'latin1', '-c'],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
+    child = subprocess.Popen(['iconv', '-f', 'utf8', '-t', 'latin1//TRANSLIT'],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
     s=child.communicate(str(s))[0]
 
     print("Running html2ps...")
