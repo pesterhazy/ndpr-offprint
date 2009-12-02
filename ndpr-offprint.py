@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 import sys
-import BeautifulSoup
+from BeautifulSoup import BeautifulSoup
 import urllib2
 import subprocess, tempfile
+from optparse import OptionParser
 
 HTML2PSCONFIG = """
 BODY {
@@ -28,54 +29,91 @@ A:link {
     } 
     paper { type: a4 } 
 	header {
-	    right: "NDPR";
+	    right: "%(title)s";
 		left: $T;
     }
     footer {
         left: $N;
-        right: NDPR;
+        right: "%(title)s";
     }
 }
 """
 
-try:
-    a = sys.argv[1]
-except IndexError:
-    print "Syntax: ndpr-offprint.py URL/file [out.pdf]"
-    sys.exit(1)
+class LRBParser:
+    format = { "title":"LRB" }
 
-try:
-    of = sys.argv[2]
-except IndexError:
-    of = "out.pdf"
+    def extract(self,txt):
+        s = BeautifulSoup(txt)
+        for x in s.findAll(style="display:none"):
+            x.extract()
 
-if a.lower().startswith("http://"):
-    print("Fetching URL: " + a)
-    f = urllib2.urlopen(a).read()
-else:
-    f = open(a).read()
+        i=s.find('div',"article-body indent")
+        t=s.find('title')
+        i=("<html>" + str(t) + "<body>" + str(i) + "</body></html>")
+        return str(i)
 
-print("Read %d bytes." % len(f))
+class NDPRParser:
+    format = { "title":"NDPR" }
 
-s = BeautifulSoup.BeautifulSoup(f)
-s.find('div',id="header").extract()
-s.find('div',id="footer").extract()
+    def extract(self,txt):
+        s = BeautifulSoup(txt)
+        s.find('div',id="header").extract()
+        s.find('div',id="footer").extract()
+        return str(s)
 
-print("Converting to latin1...")
-child = subprocess.Popen(['uconv', '-f', 'utf8', '-t', 'latin1', '-c'],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
-s=child.communicate(str(s))[0]
+def main():
+    parser = OptionParser("usage: %prog [options] URL/file out.pdf")
 
-print("Running html2ps...")
-configfile = tempfile.NamedTemporaryFile()
-configfile.write(HTML2PSCONFIG)
-configfile.flush()
-child = subprocess.Popen(["html2ps", "-D", "-f", configfile.name],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
-s=child.communicate(str(s))[0]
-configfile.close()
+    parser.add_option("-n","--ndpr",action="store_const",dest="type",const="ndpr",
+        help="Notre Dame Philosophical Review")
+    parser.add_option("-l","--lrb",action="store_const",dest="type",const="lrb",
+        help="London Review of Books")
+    parser.set_defaults(type="ndpr")
 
-print("Running ps2pdf...")
-child = subprocess.Popen(["ps2pdf", "-", "-"],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
-s=child.communicate(str(s))[0]
+    (options,args) = parser.parse_args()
+    if len(args) < 1:
+        parser.error("incorrect number of arguments")
 
-print("Writing %s..." % of)
-open(of,"w").write(s)
+    a = args[0]
+    try:
+        of = args[1]
+    except IndexError:
+        of = "out.pdf"
+
+    if options.type == "lrb":
+        typeparser = LRBParser()
+    else:
+        typeparser = NDPRParser()
+
+    if a.lower().startswith("http://"):
+        print("Fetching URL: " + a)
+        f = urllib2.urlopen(a).read()
+    else:
+        f = open(a).read()
+
+    print("Read %d bytes." % len(f))
+
+    # extract information
+    s=typeparser.extract(f)
+
+    print("Converting to latin1...")
+    child = subprocess.Popen(['uconv', '-f', 'utf8', '-t', 'latin1', '-c'],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
+    s=child.communicate(str(s))[0]
+
+    print("Running html2ps...")
+    configfile = tempfile.NamedTemporaryFile()
+    configfile.write(HTML2PSCONFIG % typeparser.format)
+    configfile.flush()
+    child = subprocess.Popen(["html2ps", "-D", "-f", configfile.name],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
+    s=child.communicate(str(s))[0]
+    configfile.close()
+
+    print("Running ps2pdf...")
+    child = subprocess.Popen(["ps2pdf", "-", "-"],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
+    s=child.communicate(str(s))[0]
+
+    print("Writing %s..." % of)
+    open(of,"w").write(s)
+
+if __name__ == "__main__":
+    main()
