@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys
+import sys, os
 from BeautifulSoup import BeautifulSoup
 import urllib2
 import subprocess, tempfile
@@ -38,6 +38,18 @@ A:link {
     }
 }
 """
+
+BLANKPAGE = """
+<html>
+<head>
+<title>&nbsp;</title>
+</head>
+<body>
+<p>&nbsp;</p>
+</body>
+</html>
+"""
+
 
 class LRBParser:
     format = { "title":"LRB" }
@@ -78,7 +90,11 @@ def main():
     try:
         of = args[1]
     except IndexError:
-        of = "out.pdf"
+        if a.lower().startswith("http://"):
+            of = "out.pdf"
+        else:
+            root = os.path.splitext(os.path.basename(a))[0]
+            of = root + ".pdf"
 
     if options.type == "lrb":
         typeparser = LRBParser()
@@ -104,9 +120,18 @@ def main():
     configfile = tempfile.NamedTemporaryFile()
     configfile.write(HTML2PSCONFIG % typeparser.format)
     configfile.flush()
-    child = subprocess.Popen(["html2ps", "-D", "-f", configfile.name],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
+    sourcefile = tempfile.NamedTemporaryFile()
+    sourcefile.write(s)
+    sourcefile.flush()
+    # bug in html2ps: add blank file, so html2ps doesn't swalllow the last page in 2up mode
+    blankfile = tempfile.NamedTemporaryFile()
+    blankfile.write(BLANKPAGE)
+    blankfile.flush()
+    child = subprocess.Popen(["html2ps", "-D", "-f", configfile.name, sourcefile.name, blankfile.name],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
     s=child.communicate(str(s))[0]
     configfile.close()
+    sourcefile.close()
+    blankfile.close()
 
     print("Running ps2pdf...")
     child = subprocess.Popen(["ps2pdf", "-", "-"],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
