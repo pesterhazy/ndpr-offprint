@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="form-container">
+
+<p>Offprint is intended to make nice-looking printouts from Notre Dame Philosophical Review. It take the URL of a review article and outputs a typeset PDF file.</p>
+
+<form action="{{ url_for("go") }}" method="post" >
+
+<fieldset>
+    <legend>Offprint from the web</legend>
+        <div><label for="url">Web address</label> <input id="url" type="text" name="url" value="" size="65" />
+            <p class="note">Point to a NDPR url.</p>
+  </div>
+<!--  <div> <label for="pages">Include pages</label>-->
+<!--  <input name="pages" type="radio" value="all" checked="checked" />all &nbsp; -->
+<!--  <input name="pages" type="radio" value="skipfirst" />skip first &nbsp; -->
+<!--  <input name="pages" type="radio" value="list" />list of pages (e.g. 1-2,5-end)-->
+<!--  <input name="plist" type="text" value="" /> -->
+<!--  </div> -->
+<!--  <div> <label for="format">Paper format</label>-->
+<!--  <input name="format" type="radio" value="a4" checked="checked" />A4 &nbsp; -->
+<!--  <input name="format" type="radio" value="letter" />letter-->
+<!--  </div> -->
+</fieldset>
+
+<div class="buttonrow">
+    <input type="submit" value="Go" class="button" />
+</div>
+
+</form>
+
+</div>
+
+{% endblock %}
