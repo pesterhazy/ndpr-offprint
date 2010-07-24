@@ -39,13 +39,14 @@ def runLatex(html):
         i = tmpdir + "/i.html"
         o = tmpdir + "/o.tex"
         p = tmpdir + "/o.pdf"
+        template = os.path.dirname(__file__) + "/latex.template"
 
         f = open(i, "wb")
         f.write(html)
         f.close()
 
         subprocess.check_call(["pandoc", "-f", "html", "-st", "latex", "--xetex",
-            "-o", o, i])
+            "--template=" + template, "-o", o, i])
         subprocess.check_call(["xelatex", "-interaction=batchmode", "-output-directory", tmpdir, o])
 
         pdf = open(p, "rb").read()
