@@ -73,10 +73,14 @@ def runLatex(html):
     return pdf
 
 def convert(url):
+    logging.debug("Retrieving url '%s'" % url)
     html = urllib2.urlopen(url).read()
+    logging.debug("Parsing")
     typeparser = NDPRParser()
     html = typeparser.extract(html)
+    logging.debug("Running latex")
     pdf = runLatex(html)
+    logging.debug("Done.")
     return pdf
 
 def main():
