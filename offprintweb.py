@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
-import re, yaml, os
+import re, yaml, os, logging
 from flask import Flask, request, render_template, Response
 from ndpr import convert
+
+LOGFILENAME = os.path.dirname(__file__) + "/ndpr.log"
+logging.basicConfig(filename=LOGFILENAME,level=logging.DEBUG,format="%(asctime)s - %(levelname)s - %(message)s")
 
 app = Flask(__name__)
 app.debug = True

@@ -7,9 +7,6 @@ import subprocess, tempfile, shutil
 from optparse import OptionParser
 import logging
 
-LOGFILENAME = os.path.dirname(__file__) + "/ndpr.log"
-logging.basicConfig(filename=LOGFILENAME,level=logging.DEBUG,format="%(asctime)s - %(levelname)s - %(message)s")
-
 class LatexFailedError(Exception):
     pass
 
