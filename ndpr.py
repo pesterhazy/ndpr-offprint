@@ -5,6 +5,13 @@ from BeautifulSoup import BeautifulSoup
 import urllib2
 import subprocess, tempfile, shutil
 from optparse import OptionParser
+import logging
+
+LOGFILENAME = os.path.dirname(__file__) + "/ndpr.log"
+logging.basicConfig(filename=LOGFILENAME,level=logging.DEBUG,format="%(asctime)s - %(levelname)s - %(message)s")
+
+class LatexFailedError(Exception):
+    pass
 
 class LRBParser:
     format = { "title":"LRB" }
@@ -39,6 +46,7 @@ def runLatex(html):
         i = tmpdir + "/i.html"
         o = tmpdir + "/o.tex"
         p = tmpdir + "/o.pdf"
+        l = tmpdir + "/o.log"
         template = os.path.dirname(__file__) + "/latex.template"
 
         f = open(i, "wb")
@@ -47,14 +55,19 @@ def runLatex(html):
 
         subprocess.check_call(["pandoc", "-f", "html", "-st", "latex", "--xetex",
             "--template=" + template, "-o", o, i])
-        subprocess.check_call(["xelatex", "-interaction=batchmode", "-output-directory", tmpdir, o])
+        code = subprocess.call(["xelatex", "-interaction=batchmode", "-output-directory", tmpdir, o])
+
+        if code != 0:
+            print("Warning: latex returned error code %s" % code)
+            logging.warning(open(l,"r").read())
+
+        if not os.path.exists(p):
+            raise LatexFailedError("No PDF generated.")
 
         pdf = open(p, "rb").read()
         if len(pdf) < 1000:
-            raise Exception("Invalid PDF")
+            raise LatexFailedError("Invalid PDF")
     finally:
-#        print(p)
-#        sys.stdin.readline()
         shutil.rmtree(tmpdir)
     
     return pdf
@@ -117,7 +130,11 @@ def main():
         f.write(s)
         f.close()
     else:
-        pdf = runLatex(s)
+        try:
+            pdf = runLatex(s)
+        except LatexFailedError:
+            print("Error: Latex command failed to generate PDF file.")
+            sys.exit(1)
 
         print("Writing %s..." % of)
         f=open(of,"w")
