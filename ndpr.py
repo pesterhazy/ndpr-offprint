@@ -73,6 +73,8 @@ def main():
         help="Notre Dame Philosophical Review")
     parser.add_option("-l","--lrb",action="store_const",dest="type",const="lrb",
         help="London Review of Books")
+    parser.add_option("-x","--extract",action="store_true",dest="extract",
+        help="Extract only (don't generate pdf)")
     parser.set_defaults(type="ndpr")
 
     (options,args) = parser.parse_args()
@@ -83,6 +85,10 @@ def main():
     try:
         of = args[1]
     except IndexError:
+        if options.extract:
+            print("You need to specify an output file name.")
+            sys.exit(1)
+
         if a.lower().startswith("http://"):
             of = "out.pdf"
         else:
@@ -105,12 +111,18 @@ def main():
     # extract information
     s=typeparser.extract(f)
 
-    pdf = runLatex(s)
+    if options.extract:
+        print("Writing %s..." % of)
+        f = open(of,"w")
+        f.write(s)
+        f.close()
+    else:
+        pdf = runLatex(s)
 
-    print("Writing %s..." % of)
-    f=open(of,"w")
-    f.write(pdf)
-    f.close()
+        print("Writing %s..." % of)
+        f=open(of,"w")
+        f.write(pdf)
+        f.close()
 
 if __name__ == "__main__":
     main()

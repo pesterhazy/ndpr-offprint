@@ -22,6 +22,8 @@ $else$
 \usepackage[mathletters]{ucs}
 \usepackage[utf8x]{inputenc}
 $endif$
+\usepackage{csquotes}
+\MakeOuterQuote{"}
 $if(lhs)$
 \usepackage{listings}
 \lstnewenvironment{code}{\lstset{language=Haskell,basicstyle=\small\ttfamily}}{}
