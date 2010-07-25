@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import re, yaml, os
-from flask import Flask, request, redirect, render_template, Response
+from flask import Flask, request, render_template, Response
 from ndpr import convert
 
 app = Flask(__name__)
