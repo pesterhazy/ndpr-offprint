@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="form-container">
+
+<p>Offprint formats web pages nicely.</p>
+<h3>Recent changes</h3>
+{% for line in gitlog %}
+<p> {{ line }} </p>
+{% endfor %}
+
+</div>
+
+{% endblock %}
