@@ -1,12 +1,12 @@
 $if(legacy-header)$
 $legacy-header$
 $else$
-\documentclass[12pt]{article}
+\documentclass{article}
 \setlength{\columnsep}{2cm}
 \usepackage[a4paper,landscape,twocolumn]{geometry}
 \usepackage{fullpage}
 \usepackage{amsmath}
-\linespread{1.3}
+\linespread{1.2}
 $if(xetex)$
 \usepackage{ifxetex}
 \ifxetex

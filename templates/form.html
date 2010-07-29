@@ -4,14 +4,14 @@
 
 <div class="form-container">
 
-<p>Offprint is intended to make nice-looking printouts from Notre Dame Philosophical Review. It take the URL of a review article and outputs a typeset PDF file.</p>
+<p>Offprint is intended to make nice-looking printouts from Notre Dame Philosophical Review or other sites. It take the URL of a review article and outputs a typeset PDF file.</p>
 
 <form action="{{ url_for("go") }}" method="post" >
 
 <fieldset>
     <legend>Offprint from the web</legend>
         <div><label for="url">Web address</label> <input id="url" type="text" name="url" value="" size="65" />
-            <p class="note">Point to a NDPR url.</p>
+            <p class="note">Point to a NDPR or LRB url.</p>
   </div>
 <!--  <div> <label for="pages">Include pages</label>-->
 <!--  <input name="pages" type="radio" value="all" checked="checked" />all &nbsp; -->

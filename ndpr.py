@@ -10,6 +10,12 @@ import logging
 class LatexFailedError(Exception):
     pass
 
+class DefaultParser:
+    format = { "title":"From web" }
+
+    def extract(self,txt):
+        return str(txt)
+
 class LRBParser:
     format = { "title":"LRB" }
 
@@ -19,8 +25,6 @@ class LRBParser:
             x.extract()
 
         i=s.find('div',"article-body indent")
-        t=s.find('title')
-        i=("<html>" + str(t) + "<body>" + str(i) + "</body></html>")
         return str(i)
 
 class NDPRParser:
@@ -73,7 +77,14 @@ def convert(url):
     logging.debug("Retrieving url '%s'" % url)
     html = urllib2.urlopen(url).read()
     logging.debug("Parsing")
-    typeparser = NDPRParser()
+
+    if re.search("lrb\.co\.uk", url):
+        typeparser = LRBParser()
+    elif re.search("ndpr\.nd\.edu", url):
+        typeparser = NDPRParser()
+    else:
+        typeparser = DefaultParser()
+        
     html = typeparser.extract(html)
     logging.debug("Running latex")
     pdf = runLatex(html)
