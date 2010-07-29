@@ -27,6 +27,15 @@ class LRBParser:
         i=s.find('div',"article-body indent")
         return str(i)
 
+class NYRBParser:
+    format = { "title":"New York Review of Books" }
+
+    def extract(self,txt):
+        s = BeautifulSoup(txt)
+
+        i=s.find(id="article-body")
+        return str(i)
+
 class NDPRParser:
     format = { "title":"NDPR" }
 
@@ -82,6 +91,8 @@ def convert(url):
         typeparser = LRBParser()
     elif re.search("ndpr\.nd\.edu", url):
         typeparser = NDPRParser()
+    elif re.search("nybooks\.com", url):
+        typeparser = NYRBParser()
     else:
         typeparser = DefaultParser()
         
