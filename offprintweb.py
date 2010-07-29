@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import re, yaml, os, logging
+import re, yaml, os, logging, subprocess
 from flask import Flask, request, render_template, Response
 from ndpr import convert
 
@@ -11,8 +11,16 @@ app = Flask(__name__)
 app.debug = True
 
 @app.route('/')
-def about():
+def index():
     return render_template("form.html")
+
+@app.route('/about')
+def about():
+    gitdir = os.path.dirname(__file__) + "/.git"
+    gitlog = subprocess.Popen(["git","--git-dir",gitdir,"log","--format=%ar: %s","--max-count=12"],stdout=subprocess.PIPE).communicate()[0]
+    gitlog = [s.strip() for s in gitlog.split("\n")]
+
+    return render_template("about.html", gitlog=gitlog)
 
 @app.route('/go', methods=["POST"])
 def go():
