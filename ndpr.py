@@ -36,6 +36,15 @@ class NYRBParser:
         i=s.find(id="article-body")
         return str(i)
 
+class SEPParser:
+    format = { "title":"Stanford Encyclopedia" }
+
+    def extract(self,txt):
+        s = BeautifulSoup(txt)
+
+        i=s.find(id="aueditable")
+        return str(i)
+
 class NDPRParser:
     format = { "title":"NDPR" }
 
@@ -93,6 +102,8 @@ def convert(url):
         typeparser = NDPRParser()
     elif re.search("nybooks\.com", url):
         typeparser = NYRBParser()
+    elif re.search("plato\.stanford\.edu|stanford\.library\.usyd\.edu\.au|www\.seop\.leeds\.ac\.uk|www\.science\.uva\.nl", url):
+        typeparser = SEPParser()
     else:
         typeparser = DefaultParser()
         
@@ -136,33 +147,33 @@ def main():
     else:
         typeparser = NDPRParser()
 
-    if a.lower().startswith("http://"):
-        print("Fetching URL: " + a)
-        f = urllib2.urlopen(a).read()
-    else:
+    if not a.lower().startswith("http://"):
+#        print("Fetching URL: " + a)
+#        f = urllib2.urlopen(a).read()
+#    else:
+        print "Temporarily disabled."
+        sys.exit(1)
+
         f = open(a).read()
 
-    print("Read %d bytes." % len(f))
+    pdf = convert(a)
 
-    # extract information
-    s=typeparser.extract(f)
+#    if options.extract:
+#        print("Writing %s..." % of)
+#        f = open(of,"w")
+#        f.write(s)
+#        f.close()
+#    else:
+#        try:
+#            pdf = runLatex(s)
+#        except LatexFailedError:
+#            print("Error: Latex command failed to generate PDF file.")
+#            sys.exit(1)
 
-    if options.extract:
-        print("Writing %s..." % of)
-        f = open(of,"w")
-        f.write(s)
-        f.close()
-    else:
-        try:
-            pdf = runLatex(s)
-        except LatexFailedError:
-            print("Error: Latex command failed to generate PDF file.")
-            sys.exit(1)
-
-        print("Writing %s..." % of)
-        f=open(of,"w")
-        f.write(pdf)
-        f.close()
+    print("Writing %s..." % of)
+    f=open(of,"w")
+    f.write(pdf)
+    f.close()
 
 if __name__ == "__main__":
     main()
