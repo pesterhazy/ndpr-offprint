@@ -61,20 +61,22 @@ class NDPRParser:
 
         return str(soup)
 
-def runLatex(html):
+def runLatex(html, layout="manuscript", typ="html"):
     tmpdir = tempfile.mkdtemp(prefix="offprint")
     try:
         i = tmpdir + "/i.html"
         o = tmpdir + "/o.tex"
         p = tmpdir + "/o.pdf"
         l = tmpdir + "/o.log"
-        template = BASEDIR + "/latex.template"
+        template = BASEDIR + ("/%s.template" % (layout,))
 
         f = open(i, "wb")
         f.write(html)
         f.close()
 
-        subprocess.check_call(["pandoc", "-f", "html", "-st", "latex", "--xetex",
+        print >>sys.stderr, "tmpdir:", tmpdir
+
+        subprocess.check_call(["pandoc", "-f", typ, "-st", "latex", "--xetex",
             "--template=" + template, "-o", o, i])
         code = subprocess.call(["xelatex", "-interaction=batchmode", "-output-directory", tmpdir, o])
 
@@ -89,11 +91,12 @@ def runLatex(html):
         if len(pdf) < 1000:
             raise LatexFailedError("Invalid PDF")
     finally:
-        shutil.rmtree(tmpdir)
+#        shutil.rmtree(tmpdir)
+        pass
     
     return pdf
 
-def convert(url,typ="url"):
+def convert(url,layout="manuscript",typ="url",offprint=True):
     if typ=="url":
         logging.debug("Retrieving url '%s'" % url)
         html = urllib2.urlopen(url).read()
@@ -101,22 +104,28 @@ def convert(url,typ="url"):
         # local file
         html = open(url).read()
 
-    logging.debug("Parsing")
+    if offprint:
+        logging.debug("Parsing")
 
-    if re.search("lrb\.co\.uk", url):
-        typeparser = LRBParser()
-    elif re.search("ndpr\.nd\.edu", url):
-        typeparser = NDPRParser()
-    elif re.search("nybooks\.com", url):
-        typeparser = NYRBParser()
-    elif re.search("plato\.stanford\.edu|stanford\.library\.usyd\.edu\.au|www\.seop\.leeds\.ac\.uk|www\.science\.uva\.nl", url):
+    #    if re.search("lrb\.co\.uk", url):
+    #        typeparser = LRBParser()
+    #    elif re.search("ndpr\.nd\.edu", url):
+    #        typeparser = NDPRParser()
+    #    elif re.search("nybooks\.com", url):
+    #        typeparser = NYRBParser()
+    #    elif re.search("plato\.stanford\.edu|stanford\.library\.usyd\.edu\.au|www\.seop\.leeds\.ac\.uk|www\.science\.uva\.nl", url):
+    #        typeparser = SEPParser()
+    #    else:
+    #        typeparser = DefaultParser()
         typeparser = SEPParser()
-    else:
-        typeparser = DefaultParser()
-        
-    html = typeparser.extract(html)
+            
+        html = typeparser.extract(html)
+
     logging.debug("Running latex")
-    pdf = runLatex(html)
+    if offprint:
+        pdf = runLatex(html,layout=layout)
+    else:
+        pdf = runLatex(html,layout=layout,typ="markdown")
     logging.debug("Done.")
     return pdf
 

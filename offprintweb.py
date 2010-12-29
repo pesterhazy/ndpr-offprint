@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import re, yaml, os, logging, subprocess, sys, tempfile
-from flask import Flask, request, render_template, Response
+from flask import Flask, request, render_template, Response, redirect, url_for
 from ndpr import convert
 from werkzeug import secure_filename
 
@@ -45,18 +45,14 @@ def offprinturl():
 
 @app.route('/offprintfile', methods=["POST"])
 def offprintfile():
-    print >>sys.stderr, "test 1:"+str(request.files['file'])
     file = request.files['file']
-    file.read()
-    print >>sys.stderr, "test 1.5"
     filename = os.path.basename(tempfile.mktemp(dir=UPLOADDIR))
     file.save(os.path.join(UPLOADDIR, filename))
-    print >>sys.stderr, "test 2"
 
     return redirect(url_for('offprintfile_up', filename=filename))
 
 @app.route('/offprintfile_up/<filename>')
-def offprintfile_up():
+def offprintfile_up(filename):
     filename = secure_filename(filename)
     file = os.path.join(UPLOADDIR, filename)
 
@@ -68,17 +64,22 @@ def offprintfile_up():
     r.headers["content-length"] = len(pdf)
     return r
 
-@app.route('/markdown', methods=["POST"])
-def markdown():
-    url = request.form["url"]
+@app.route('/markdownfile', methods=["POST"])
+def markdownfile():
+    file = request.files['file']
+    filename = os.path.basename(tempfile.mktemp(dir=UPLOADDIR))
+    file.save(os.path.join(UPLOADDIR, filename))
 
-    m=re.search("review.cfm\?id=(\d*)",url)
-    if m:
-        filename = "ndpr-%s.pdf" % m.group(1)
-    else:
-        filename = "ndpr.pdf"
+    layout = "2up" #request.form['layout']
 
-    pdf = convert(url)
+    return redirect(url_for('markdownfile_up', filename=filename, layout=layout))
+
+@app.route('/markdownfile_up/<filename>/<layout>')
+def markdownfile_up(filename,layout):
+    filename = secure_filename(filename)
+    file = os.path.join(UPLOADDIR, filename)
+
+    pdf = convert(file,layout=layout,typ="local",offprint=False)
 
     r = Response(pdf)
     r.headers["content-type"] = "application/pdf"

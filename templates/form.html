@@ -54,14 +54,19 @@
 
 <div class="form-container">
 
-<form action="{{ url_for("markdown") }}" method="post" >
+<form action="{{ url_for("markdownfile") }}" method="post" enctype="multipart/form-data" >
 
 <fieldset>
     <legend>Typeset a text document with <em>markdown</em> syntax to PDF</legend>
         <div><label for="file">Markdown file:</label> <input id="file" type="file" name="file" value="" size="65" />
-            <p class="note">Any HTML file.</p>
+            <p class="note">A text file with markdown syntax.</p>
   </div>
 </fieldset>
+
+<div> <label for="layout">Page layout</label>
+<input name="format" type="radio" value="manuscript" checked="checked" />Manuscript &nbsp; 
+<input name="format" type="radio" value="2up" />2up
+</div> 
 
 <div class="buttonrow">
     <input type="submit" value="Go" class="button" />
