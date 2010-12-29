@@ -4,7 +4,8 @@ import re, yaml, os, logging, subprocess
 from flask import Flask, request, render_template, Response
 from ndpr import convert
 
-LOGFILENAME = os.path.dirname(__file__) + "/ndpr.log"
+BASEDIR = os.path.dirname(os.path.abspath(__file__))
+LOGFILENAME = BASEDIR + "/ndpr.log"
 logging.basicConfig(filename=LOGFILENAME,level=logging.DEBUG,format="%(asctime)s - %(levelname)s - %(message)s")
 
 app = Flask(__name__)
@@ -66,4 +67,4 @@ def search():
     return redirect(url)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host="0.0.0.0",port=9291)
