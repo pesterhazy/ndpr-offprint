@@ -61,7 +61,7 @@ class NDPRParser:
 
         return str(soup)
 
-def runLatex(html, layout="manuscript", typ="html"):
+def runLatex(html, layout="2up", typ="html"):
     tmpdir = tempfile.mkdtemp(prefix="offprint")
     try:
         i = tmpdir + "/i.html"
@@ -96,7 +96,7 @@ def runLatex(html, layout="manuscript", typ="html"):
     
     return pdf
 
-def convert(url,layout="manuscript",typ="url",offprint=True):
+def convert(url,layout="2up",typ="url",offprint=True):
     if typ=="url":
         logging.debug("Retrieving url '%s'" % url)
         html = urllib2.urlopen(url).read()
