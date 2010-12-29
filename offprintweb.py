@@ -26,6 +26,7 @@ def about():
     return render_template("about.html", gitlog=gitlog)
 
 @app.route('/offprinturl', methods=["POST"])
+@app.route('/go', methods=["GET","POST"])
 def offprinturl():
     url = request.form["url"]
 
