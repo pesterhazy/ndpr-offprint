@@ -70,7 +70,7 @@ def markdownfile():
     filename = os.path.basename(tempfile.mktemp(dir=UPLOADDIR))
     file.save(os.path.join(UPLOADDIR, filename))
 
-    layout = "2up" #request.form['layout']
+    layout = request.form['layout']
 
     return redirect(url_for('markdownfile_up', filename=filename, layout=layout))
 
