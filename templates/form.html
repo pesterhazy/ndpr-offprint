@@ -2,11 +2,11 @@
 
 {% block content %}
 
-<div class="form-container">
-
 <p>Offprint is intended to make nice-looking printouts from Notre Dame Philosophical Review or other sites. It take the URL of a review article and outputs a typeset PDF file.</p>
 
-<form action="{{ url_for("go") }}" method="post" >
+<div class="form-container">
+
+<form action="{{ url_for("offprinturl") }}" method="post" >
 
 <fieldset>
     <legend>Offprint from the web</legend>
@@ -33,4 +33,41 @@
 
 </div>
 
+<div class="form-container">
+
+<form action="{{ url_for("offprintfile") }}" method="post" >
+
+<fieldset>
+    <legend>Offprint from an uploaded file</legend>
+        <div><label for="file">HTML file:</label> <input id="file" type="file" name="file" value="" size="65" />
+            <p class="note">Any HTML file.</p>
+  </div>
+</fieldset>
+
+<div class="buttonrow">
+    <input type="submit" value="Go" class="button" />
+</div>
+
+</form>
+
+</div>
+
+<div class="form-container">
+
+<form action="{{ url_for("markdown") }}" method="post" >
+
+<fieldset>
+    <legend>Typeset a text document with <em>markdown</em> syntax to PDF</legend>
+        <div><label for="file">Markdown file:</label> <input id="file" type="file" name="file" value="" size="65" />
+            <p class="note">Any HTML file.</p>
+  </div>
+</fieldset>
+
+<div class="buttonrow">
+    <input type="submit" value="Go" class="button" />
+</div>
+
+</form>
+
+</div>
 {% endblock %}

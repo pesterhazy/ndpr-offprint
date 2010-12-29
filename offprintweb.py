@@ -17,14 +17,14 @@ def index():
 
 @app.route('/about')
 def about():
-    gitdir = os.path.dirname(__file__) + "/.git"
+    gitdir = BASEDIR + "/.git"
     gitlog = subprocess.Popen(["git","--git-dir",gitdir,"log","--format=%ar: %s","--max-count=12"],stdout=subprocess.PIPE).communicate()[0]
     gitlog = [s.strip() for s in gitlog.split("\n")]
 
     return render_template("about.html", gitlog=gitlog)
 
-@app.route('/go', methods=["POST"])
-def go():
+@app.route('/offprinturl', methods=["POST"])
+def offprinturl():
     url = request.form["url"]
 
     m=re.search("review.cfm\?id=(\d*)",url)
@@ -40,7 +40,42 @@ def go():
     r.headers["content-disposition"] = "attachment;filename=" + filename
     r.headers["content-length"] = len(pdf)
     return r
-#    return render_template("hurray.html",url=x)
+
+@app.route('/offprintfile', methods=["POST"])
+def offprintfile():
+    url = request.form["url"]
+
+    m=re.search("review.cfm\?id=(\d*)",url)
+    if m:
+        filename = "ndpr-%s.pdf" % m.group(1)
+    else:
+        filename = "ndpr.pdf"
+
+    pdf = convert(url)
+
+    r = Response(pdf)
+    r.headers["content-type"] = "application/pdf"
+    r.headers["content-disposition"] = "attachment;filename=" + filename
+    r.headers["content-length"] = len(pdf)
+    return r
+
+@app.route('/markdown', methods=["POST"])
+def markdown():
+    url = request.form["url"]
+
+    m=re.search("review.cfm\?id=(\d*)",url)
+    if m:
+        filename = "ndpr-%s.pdf" % m.group(1)
+    else:
+        filename = "ndpr.pdf"
+
+    pdf = convert(url)
+
+    r = Response(pdf)
+    r.headers["content-type"] = "application/pdf"
+    r.headers["content-disposition"] = "attachment;filename=" + filename
+    r.headers["content-length"] = len(pdf)
+    return r
 
 @app.route('/search')
 def search():

@@ -7,6 +7,8 @@ import subprocess, tempfile, shutil
 from optparse import OptionParser
 import logging
 
+BASEDIR = os.path.dirname(os.path.abspath(__file__))
+
 class LatexFailedError(Exception):
     pass
 
@@ -66,7 +68,7 @@ def runLatex(html):
         o = tmpdir + "/o.tex"
         p = tmpdir + "/o.pdf"
         l = tmpdir + "/o.log"
-        template = os.path.dirname(__file__) + "/latex.template"
+        template = BASEDIR + "/latex.template"
 
         f = open(i, "wb")
         f.write(html)
