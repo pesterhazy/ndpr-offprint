@@ -93,9 +93,14 @@ def runLatex(html):
     
     return pdf
 
-def convert(url):
-    logging.debug("Retrieving url '%s'" % url)
-    html = urllib2.urlopen(url).read()
+def convert(url,typ="url"):
+    if typ=="url":
+        logging.debug("Retrieving url '%s'" % url)
+        html = urllib2.urlopen(url).read()
+    else:
+        # local file
+        html = open(url).read()
+
     logging.debug("Parsing")
 
     if re.search("lrb\.co\.uk", url):

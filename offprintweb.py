@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
-import re, yaml, os, logging, subprocess
+import re, yaml, os, logging, subprocess, sys, tempfile
 from flask import Flask, request, render_template, Response
 from ndpr import convert
+from werkzeug import secure_filename
 
 BASEDIR = os.path.dirname(os.path.abspath(__file__))
+UPLOADDIR = BASEDIR + "/tmp"
 LOGFILENAME = BASEDIR + "/ndpr.log"
 logging.basicConfig(filename=LOGFILENAME,level=logging.DEBUG,format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -43,15 +45,22 @@ def offprinturl():
 
 @app.route('/offprintfile', methods=["POST"])
 def offprintfile():
-    url = request.form["url"]
+    print >>sys.stderr, "test 1:"+str(request.files['file'])
+    file = request.files['file']
+    file.read()
+    print >>sys.stderr, "test 1.5"
+    filename = os.path.basename(tempfile.mktemp(dir=UPLOADDIR))
+    file.save(os.path.join(UPLOADDIR, filename))
+    print >>sys.stderr, "test 2"
 
-    m=re.search("review.cfm\?id=(\d*)",url)
-    if m:
-        filename = "ndpr-%s.pdf" % m.group(1)
-    else:
-        filename = "ndpr.pdf"
+    return redirect(url_for('offprintfile_up', filename=filename))
 
-    pdf = convert(url)
+@app.route('/offprintfile_up/<filename>')
+def offprintfile_up():
+    filename = secure_filename(filename)
+    file = os.path.join(UPLOADDIR, filename)
+
+    pdf = convert(file,typ="local")
 
     r = Response(pdf)
     r.headers["content-type"] = "application/pdf"
