@@ -28,7 +28,11 @@ def about():
 @app.route('/offprinturl', methods=["POST"])
 @app.route('/go', methods=["GET","POST"])
 def offprinturl():
-    url = request.form["url"]
+    url = None
+    try:
+        url = request.form["url"]
+    except:
+        url = request.args["url"]
 
     m=re.search("review.cfm\?id=(\d*)",url)
     if m:
