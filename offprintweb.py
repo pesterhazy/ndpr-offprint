@@ -36,9 +36,9 @@ def offprinturl():
 
     m=re.search("review.cfm\?id=(\d*)",url)
     if m:
-        filename = "ndpr-%s.pdf" % m.group(1)
+        filename = "offprint-%s.pdf" % m.group(1)
     else:
-        filename = "ndpr.pdf"
+        filename = "offprint.pdf"
 
     pdf = convert(url)
 
@@ -86,9 +86,13 @@ def markdownfile_up(filename,layout):
 
     pdf = convert(file,layout=layout,typ="local",offprint=False)
 
+    fn = os.path.basename(filename)
+    (fn,ext) = os.path.splitext(filename)
+    fn = fn + "-2x1.pdf"
+
     r = Response(pdf)
     r.headers["content-type"] = "application/pdf"
-    r.headers["content-disposition"] = "attachment;filename=" + filename
+    r.headers["content-disposition"] = "attachment;filename=" + fn
     r.headers["content-length"] = len(pdf)
     return r
 
