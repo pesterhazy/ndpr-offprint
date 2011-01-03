@@ -61,6 +61,19 @@ class NDPRParser:
 
         return str(soup)
 
+def deduceParserFromUrl(url):
+    if re.search("lrb\.co\.uk", url):
+        typeparser = LRBParser
+    elif re.search("ndpr\.nd\.edu", url):
+        typeparser = NDPRParser
+    elif re.search("nybooks\.com", url):
+        typeparser = NYRBParser
+    elif re.search("plato\.stanford\.edu|stanford\.library\.usyd\.edu\.au|www\.seop\.leeds\.ac\.uk|www\.science\.uva\.nl", url):
+        typeparser = SEPParser
+    else:
+        typeparser = DefaultParser
+    return typeparser
+
 def runLatex(html, layout="2up", typ="html"):
     tmpdir = tempfile.mkdtemp(prefix="offprint")
     try:
@@ -96,7 +109,7 @@ def runLatex(html, layout="2up", typ="html"):
     
     return pdf
 
-def convert(url,layout="2up",typ="url",offprint=True):
+def convert(url,parser=DefaultParser,layout="2up",typ="url",offprint=True):
     if typ=="url":
         logging.debug("Retrieving url '%s'" % url)
         html = urllib2.urlopen(url).read()
@@ -107,18 +120,10 @@ def convert(url,layout="2up",typ="url",offprint=True):
     if offprint:
         logging.debug("Parsing")
 
-    #    if re.search("lrb\.co\.uk", url):
-    #        typeparser = LRBParser()
-    #    elif re.search("ndpr\.nd\.edu", url):
-    #        typeparser = NDPRParser()
-    #    elif re.search("nybooks\.com", url):
-    #        typeparser = NYRBParser()
-    #    elif re.search("plato\.stanford\.edu|stanford\.library\.usyd\.edu\.au|www\.seop\.leeds\.ac\.uk|www\.science\.uva\.nl", url):
-    #        typeparser = SEPParser()
-    #    else:
-    #        typeparser = DefaultParser()
-        typeparser = SEPParser()
-            
+        if typ=="url":
+            parser = deduceParserFromUrl(url)
+
+        typeparser = parser() # instantiate
         html = typeparser.extract(html)
 
     logging.debug("Running latex")
